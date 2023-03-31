@@ -14,3 +14,4 @@
 
 ## How to start:
 
+npm start - in the client folder.
