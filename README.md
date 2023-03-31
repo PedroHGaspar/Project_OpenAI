@@ -12,6 +12,5 @@
 ● Make API requests; <br />
 ● Write clean code and much more. <br />
 
-
 ## How to start:
 
