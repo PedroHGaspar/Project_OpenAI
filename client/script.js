@@ -27,7 +27,7 @@ function typeText(element, text) {
   let interval = setInterval(() => {
       if (index < text.length) {
           element.innerHTML += text.charAt(index)
-          index++
+          index++//this index++ make the words never stops until the message is complete.
       } else {
           clearInterval(interval)
       }
@@ -82,7 +82,7 @@ const handleSubmit = async (e) => {
 
   //fetch data from server = bot's response
 
-  const response = await fetch('http://localhost:5000', {
+  const response = await fetch('http://localhost:5000', {//this fetch will make the POST method, so that the api can bring the message, the await helps with the time to wait the fetch to be done
     method: 'POST',
     headers: {
       "Content-Type": "application/json"
@@ -97,9 +97,9 @@ const handleSubmit = async (e) => {
 
   if (response.ok) {
     const data = await response.json();
-    const parsedData = data.bot.trim();
+    const parsedData = data.bot.trim(); //The trim() method removes whitespace from both ends of a string and returns a new string, without modifying the original string.
 
-    typeText(messageDiv, parsedData);
+    typeText(messageDiv, parsedData);//here the bot will bring the messageDiv(with the uniqueID), and the parsedData, whitch is the message itself.
   } else {
     const err = await response.text();
 
@@ -110,7 +110,7 @@ const handleSubmit = async (e) => {
 
 form.addEventListener('submit', handleSubmit);
 form.addEventListener('keyup', (e) => {
-  if (e.keyCode === 13) {
+  if (e.keyCode === 13) {//keyCode is deprecated
     handleSubmit(e);//this makes the enter button functional.
   }
 })
