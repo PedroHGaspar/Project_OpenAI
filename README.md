@@ -14,5 +14,5 @@
 
 ## How to start:
 
-npm run start - in the server folder.
+npm run start - in the server folder. <br />
 npm run dev = in the client folder.
