@@ -7,31 +7,34 @@ const chatContainer = document.querySelector('#chat_container');
 let loadInterval;
 
 
-function loader(element){
-  element.textContext = '';
+function loader(element) {
+  element.textContent = ''
 
   loadInterval = setInterval(() => {
-    element.textContext += '.';
+      // Update the text content of the loading indicator
+      element.textContent += '.';
 
-    if(element.textContext === '....'){//whit if makes the '...' of the AI before he gives an answer
-      element.textContext = '';
-    }
-  }, 300)// 300miliseconds per .
+      // If the loading indicator has reached three dots, reset it
+      if (element.textContent === '....') {
+          element.textContent = '';
+      }
+  }, 300);
 }
 
-function typeText(element, text){
-  let index = 0;
+function typeText(element, text) {
+  let index = 0
 
   let interval = setInterval(() => {
-    if(index < text.length){
-      element.innerHTML += text.chartAt(index);
-    }else{
-      clearInterval(interval);
-    }
-  }, 20)//20 miliseconds per letter
+      if (index < text.length) {
+          element.innerHTML += text.charAt(index)
+          index++
+      } else {
+          clearInterval(interval)
+      }
+  }, 20)
 }
 
-function generateUniqueId(){
+function generateUniqueId() {
   const timestamp = Date.now();
   const randomNumber = Math.random();
   const hexadecimalString = randomNumber.toString(16);
@@ -39,3 +42,75 @@ function generateUniqueId(){
   return `id-${timestamp}-${hexadecimalString}`//this generates an unique random ID with the current time and random number.
 }
 
+function chatStripe(isAi, value, uniqueId) {
+  return (
+    `
+    <div class="wrapper ${isAi && 'ai'}">
+      <div class="chat">
+        <div class="profile">
+          <img
+          src = "${isAi ? bot : user}"
+          alt = "${isAi ? 'bot' : 'user'}"   
+          />
+        </div>
+        <div class="message" id=${uniqueId}>${value}</div>
+      </div>
+    </div>
+    `
+  )
+}
+
+const handleSubmit = async (e) => {
+  e.preventDefault();//this is goind to prevent the deffault behavior of the browser
+
+  const data = new FormData(form);
+
+  //user's chat stripe
+  chatContainer.innerHTML += chatStripe(false, data.get('prompt'));
+
+  form.reset();//clear the text area input
+
+  //bot's chat stripe
+  const uniqueId = generateUniqueId();
+  chatContainer.innerHTML += chatStripe(true, " ", uniqueId);//this time will be true because the AI is typing
+
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+
+  const messageDiv = document.getElementById(uniqueId);
+
+  loader(messageDiv);
+
+  //fetch data from server = bot's response
+
+  const response = await fetch('http://localhost:5000', {
+    method: 'POST',
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      prompt: data.get('prompt')
+    })
+  })
+
+  clearInterval(loadInterval);
+  messageDiv.innerHTML = "";
+
+  if (response.ok) {
+    const data = await response.json();
+    const parsedData = data.bot.trim();
+
+    typeText(messageDiv, parsedData);
+  } else {
+    const err = await response.text();
+
+    messageDiv.innerHTML = "Something went wrong :("
+    alert(err)
+  }
+}
+
+form.addEventListener('submit', handleSubmit);
+form.addEventListener('keyup', (e) => {
+  if (e.keyCode === 13) {
+    handleSubmit(e);//this makes the enter button functional.
+  }
+})
